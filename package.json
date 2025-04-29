@@ -1,0 +1,31 @@
+{
+  "name": "prc-recreate",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "path": "^0.12.7",
+    "pg": "^8.14.1"
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aworminator/PRC-Recreate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aworminator/PRC-Recreate/issues"
+  },
+  "homepage": "https://github.com/Aworminator/PRC-Recreate#readme"
+}

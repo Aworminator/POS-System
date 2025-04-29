@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <title>First Aid POS System</title>
+  </head>
+  <body>
+    <div class="parent">
+      <div class="top">
+        <div class="pos">
+          <h1 class="title">First Aid POS System</h1>
+        </div>
+      </div>
+
+      <div class="middle">
+        <div class="grid">
+          <button class="clearAll">Clear All</button>
+          <div class="pageOne">
+            <h2>List Items</h2>
+          </div>
+          <div class="pageTwo">
+            <h2 class="update">Price</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="body">
+        <% firstAidKit.forEach(item => { %>
+        <div class="item-wrapper">
+          <span class="trash-icon">&#128465;</span>
+          <div class="item">
+            <div class="add-button">+</div>
+            <div class="serial-number"><%= item.itemNumber %></div>
+            <div class="item-name"><%= item.name %></div>
+            <div class="price" style="display: none"><%= item.price %></div>
+            <div class="standard">Standard</div>
+            <span
+              class="quantity-box"
+              data-item-name="<%= item.name %>"
+              data-item-number="<%= item.itemNumber %>"
+              data-count="0"
+              style="cursor: pointer; color: white"
+              >0</span
+            >
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <script>
+      function reset(wrapper) {
+          const quantityBox = wrapper.querySelector('.quantity-box');
+          quantityBox.innerText = 0;
+          quantityBox.setAttribute('data-count', 0);
+          quantityBox.style.backgroundColor = 'white';
+      }
+
+      function checkAndFlashPrice() {
+          const updateButton = document.querySelector('.update');
+          const hasQuantity = Array.from(document.querySelectorAll('.quantity-box')).some(countSpan => {
+              return parseInt(countSpan.getAttribute('data-count'), 10) > 0;
+          });
+
+          if (hasQuantity) {
+              updateButton.classList.add('flashing');
+          } else {
+              updateButton.classList.remove('flashing');
+          }
+      }
+
+      document.querySelectorAll('.quantity-box').forEach(countSpan => {
+          countSpan.setAttribute('data-count', 0);
+
+          const updateCount = () => {
+              let count = parseInt(countSpan.getAttribute('data-count'), 10);
+              count++;
+              countSpan.setAttribute('data-count', count);
+              countSpan.innerText = count;
+              countSpan.style.backgroundColor = 'rgb(80, 101, 38)';
+              checkAndFlashPrice();
+          };
+
+          countSpan.addEventListener('click', updateCount);
+
+          const addButton = countSpan.closest('.item').querySelector('.add-button');
+          if (addButton) {
+              addButton.addEventListener('click', updateCount);
+          }
+      });
+
+      document.querySelectorAll('.item-wrapper').forEach(wrapper => {
+          const trashIcon = wrapper.querySelector('.trash-icon');
+          trashIcon.addEventListener('click', () => {
+              reset(wrapper);
+              checkAndFlashPrice();
+          });
+      });
+
+      const updateButton = document.querySelector('.update');
+      if (updateButton) {
+          updateButton.addEventListener('click', () => {
+              let totalSum = 0;
+
+              document.querySelectorAll('.quantity-box').forEach(countSpan => {
+                  const itemName = countSpan.getAttribute('data-item-name');
+                  const itemNumber = countSpan.getAttribute('data-item-number');
+                  const price = parseFloat(countSpan.closest('.item').querySelector('.price').innerText.trim());
+                  const quantity = parseInt(countSpan.innerText, 10);
+
+                  const totalPrice = (price * quantity).toFixed(2);
+                  totalSum += price * quantity;
+
+                  if (quantity > 0) {
+                      fetch('/update-count', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                              quantity: quantity,
+                              name: itemName,
+                              itemNumber: itemNumber,
+                              price: totalPrice
+                          })
+                      })
+                      .then(res => res.json())
+                      .then(data => console.log(data.message));
+                  }
+              });
+
+              // Send totalSum to the server
+              fetch('/update-total', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ totalSum: totalSum.toFixed(2) })
+              })
+              .then(res => res.json())
+              .then(data => console.log(data.message));
+
+              window.location.href = '/update';
+          });
+      }
+
+      document.querySelectorAll('.item').forEach(item => {
+          item.addEventListener('contextmenu', event => {
+              event.preventDefault();
+              item.classList.toggle('active');
+          });
+      });
+
+      const currentData = <%- JSON.stringify(currentData) %>;
+
+      currentData.forEach(data => {
+          const quantityBox = document.querySelector(`.quantity-box[data-item-number="${data.itemNumber}"]`);
+          if (quantityBox) {
+              quantityBox.innerText = data.quantity;
+              quantityBox.setAttribute('data-count', data.quantity);
+              quantityBox.style.backgroundColor = 'rgb(80, 101, 38)';
+          }
+      });
+
+      document.querySelector('.clearAll').addEventListener('click', () => {
+          fetch('/clear-all', { method: 'POST' })
+              .then(res => res.json())
+              .then(data => {
+                  console.log(data.message);
+                  document.querySelectorAll('.quantity-box').forEach(quantityBox => {
+                      quantityBox.innerText = 0;
+                      quantityBox.setAttribute('data-count', 0);
+                      quantityBox.style.backgroundColor = 'white';
+                  });
+                  checkAndFlashPrice();
+              });
+      });
+
+      // Add CSS for flashing effect
+      const style = document.createElement('style');
+      style.innerHTML = `
+          .flashing {
+              animation: flash 2s infinite;
+          }
+          @keyframes flash {
+              0%, 100% { color: rgb(166, 166, 166); }
+              50% { color: white; }
+          }
+      `;
+      document.head.appendChild(style);
+    </script>
+  </body>
+</html>
