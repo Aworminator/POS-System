@@ -93,22 +93,6 @@ p {
   transform: translateX(-50px);
 }
 
-.item::before {
-  content: "\2807";
-  font-size: 24px;
-  color: rgb(105, 104, 104);
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
-
-.item::before:hover {
-  color: rgb(50, 50, 50);
-  transform: translateY(-50%) scale(1.1);
-}
-
 .item::after {
   content: "";
   position: absolute;
@@ -152,9 +136,15 @@ p {
 }
 
 .trash-icon {
-  right: 10px;
-  font-size: 30px;
-  color: rgb(69, 69, 69);
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  opacity: 70%;
+  background-image: url(/images/trash-icon.png);
+  background-size: cover;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  z-index: 2;
 }
 
 .title {

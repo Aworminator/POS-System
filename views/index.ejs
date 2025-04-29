@@ -33,7 +33,13 @@
       <div class="body">
         <% firstAidKit.forEach(item => { %>
         <div class="item-wrapper">
-          <span class="trash-icon">&#128465;</span>
+          <span>
+            <img
+              src="/images/trash-icon.png"
+              class="trash-icon"
+              alt="Trash Icon"
+            />
+          </span>
           <div class="item">
             <div class="add-button">+</div>
             <div class="serial-number"><%= item.itemNumber %></div>
